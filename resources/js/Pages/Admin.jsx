@@ -22,6 +22,7 @@ export default function Admin({ profile, projects = [] }) {
     const [editingProject, setEditingProject] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [dismissFlash, setDismissFlash] = useState(false);
+    const [avatarPreview, setAvatarPreview] = useState(null);
 
     useEffect(() => {
         setDismissFlash(false);
@@ -53,6 +54,8 @@ export default function Admin({ profile, projects = [] }) {
         linkedin_url: profile?.linkedin_url || '',
         website_url: profile?.website_url || '',
         avatar_url: profile?.avatar_url || '',
+        avatar_file: null,
+        remove_avatar: false,
         skills: Array.isArray(profile?.skills) ? profile.skills : [],
         experiences: Array.isArray(profile?.experiences) ? profile.experiences : [],
         educations: Array.isArray(profile?.educations) ? profile.educations : [],
@@ -62,9 +65,43 @@ export default function Admin({ profile, projects = [] }) {
 
     const submitProfile = (e) => {
         e.preventDefault();
-        profileForm.put('/admin/profile', {
+        profileForm.transform((data) => ({
+            ...data,
+            _method: 'put',
+        }));
+        profileForm.post('/admin/profile', {
+            forceFormData: true,
             preserveScroll: true,
+            onSuccess: () => {
+                profileForm.setData((prev) => ({
+                    ...prev,
+                    avatar_file: null,
+                    remove_avatar: false,
+                }));
+                setAvatarPreview(null);
+            },
         });
+    };
+
+    const handleAvatarFileChange = (e) => {
+        const file = e.target.files?.[0] || null;
+        if (!file) return;
+        profileForm.setData((prev) => ({
+            ...prev,
+            avatar_file: file,
+            remove_avatar: false,
+        }));
+        setAvatarPreview(URL.createObjectURL(file));
+    };
+
+    const handleRemoveAvatar = () => {
+        profileForm.setData((prev) => ({
+            ...prev,
+            avatar_url: '',
+            avatar_file: null,
+            remove_avatar: true,
+        }));
+        setAvatarPreview(null);
     };
 
     const addSkill = () => {
@@ -217,6 +254,13 @@ export default function Admin({ profile, projects = [] }) {
                 <header className="sticky top-0 z-30 border-b border-paper-border bg-paper/95 backdrop-blur-sm dark:border-slate-border dark:bg-slate-bg/95">
                     <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
                         <div className="flex items-center gap-3">
+                            <img
+                                src="/images/logo.jpg"
+                                alt=""
+                                width={28}
+                                height={28}
+                                className="h-7 w-7 rounded-full object-cover"
+                            />
                             <h1 className="font-serif text-xl font-semibold text-ink dark:text-slate-ink">
                                 Admin Profil
                             </h1>
@@ -364,18 +408,79 @@ export default function Admin({ profile, projects = [] }) {
                                     )}
                                 </div>
 
-                                <div>
-                                    <label htmlFor="avatar_url" className={labelClass}>
-                                        URL Foto Profil
-                                    </label>
-                                    <input
-                                        id="avatar_url"
-                                        type="url"
-                                        value={profileForm.data.avatar_url}
-                                        onChange={(e) => profileForm.setData('avatar_url', e.target.value)}
-                                        placeholder="https://avatars.githubusercontent.com/..."
-                                        className={inputClass}
-                                    />
+                                <div className="sm:col-span-2">
+                                    <span className={labelClass}>Foto Profil</span>
+                                    <div className="mt-2 flex flex-col gap-4 rounded-md border border-paper-border bg-paper p-4 sm:flex-row sm:items-center dark:border-slate-border dark:bg-slate-bg">
+                                        {avatarPreview || (!profileForm.data.remove_avatar && profileForm.data.avatar_url) ? (
+                                            <img
+                                                src={avatarPreview || profileForm.data.avatar_url}
+                                                alt="Pratinjau foto profil"
+                                                width={80}
+                                                height={80}
+                                                className="h-20 w-20 shrink-0 rounded-lg border border-paper-border object-cover dark:border-slate-border"
+                                            />
+                                        ) : (
+                                            <div
+                                                aria-hidden="true"
+                                                className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border border-paper-border bg-paper-card font-serif text-2xl font-semibold text-ink dark:border-slate-border dark:bg-slate-card dark:text-slate-ink"
+                                            >
+                                                {(profileForm.data.full_name || 'W')[0].toUpperCase()}
+                                            </div>
+                                        )}
+
+                                        <div className="min-w-0 flex-1 space-y-2.5">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <label
+                                                    htmlFor="avatar_file"
+                                                    className="inline-flex min-h-[44px] items-center rounded-md border border-paper-border bg-paper-card px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:border-ink/40 dark:border-slate-border dark:bg-slate-card dark:text-slate-ink dark:hover:border-slate-ink/40"
+                                                >
+                                                    Unggah Foto (JPG/PNG/WebP)
+                                                </label>
+                                                <input
+                                                    id="avatar_file"
+                                                    type="file"
+                                                    accept="image/jpeg,image/png,image/webp"
+                                                    onChange={handleAvatarFileChange}
+                                                    className="sr-only"
+                                                />
+                                                {(avatarPreview || profileForm.data.avatar_url) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleRemoveAvatar}
+                                                        className="inline-flex min-h-[44px] items-center rounded-md border border-red-600/30 px-3.5 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-400/30 dark:text-red-400 dark:hover:bg-red-950/30"
+                                                    >
+                                                        Hapus Foto
+                                                    </button>
+                                                )}
+                                            </div>
+                                            {profileForm.errors.avatar_file && (
+                                                <p className="text-xs text-red-600 dark:text-red-400">
+                                                    {profileForm.errors.avatar_file}
+                                                </p>
+                                            )}
+                                            <div>
+                                                <label htmlFor="avatar_url" className="block text-xs font-medium text-ink-muted dark:text-slate-muted">
+                                                    Atau tempel URL Foto Profil secara manual
+                                                </label>
+                                                <input
+                                                    id="avatar_url"
+                                                    type="text"
+                                                    value={profileForm.data.avatar_url}
+                                                    onChange={(e) => {
+                                                        setAvatarPreview(null);
+                                                        profileForm.setData((prev) => ({
+                                                            ...prev,
+                                                            avatar_url: e.target.value,
+                                                            avatar_file: null,
+                                                            remove_avatar: false,
+                                                        }));
+                                                    }}
+                                                    placeholder="https://avatars.githubusercontent.com/..."
+                                                    className={inputClass}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div>

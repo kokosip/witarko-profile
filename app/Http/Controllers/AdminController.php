@@ -6,6 +6,7 @@ use App\Models\Profile;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -42,7 +43,9 @@ class AdminController extends Controller
             'github_url' => ['nullable', 'url', 'max:255'],
             'linkedin_url' => ['nullable', 'url', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:255'],
-            'avatar_url' => ['nullable', 'url', 'max:500'],
+            'avatar_url' => ['nullable', 'string', 'max:500'],
+            'avatar_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove_avatar' => ['nullable', 'boolean'],
             'skills' => ['nullable', 'array'],
             'skills.*' => ['string', 'max:80'],
             'experiences' => ['nullable', 'array'],
@@ -62,6 +65,17 @@ class AdminController extends Controller
 
         $profile = Profile::query()->first();
 
+        unset($validated['avatar_file'], $validated['remove_avatar']);
+
+        if ($request->boolean('remove_avatar')) {
+            $this->deleteLocalAvatar($profile?->avatar_url);
+            $validated['avatar_url'] = null;
+        } elseif ($request->hasFile('avatar_file')) {
+            $this->deleteLocalAvatar($profile?->avatar_url);
+            $path = $request->file('avatar_file')->store('avatars', 'public');
+            $validated['avatar_url'] = '/storage/'.$path;
+        }
+
         if ($profile) {
             $profile->update($validated);
         } else {
@@ -69,6 +83,16 @@ class AdminController extends Controller
         }
 
         return back()->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    private function deleteLocalAvatar(?string $avatarUrl): void
+    {
+        if (! $avatarUrl || ! str_starts_with($avatarUrl, '/storage/avatars/')) {
+            return;
+        }
+
+        $relativePath = Str::after($avatarUrl, '/storage/');
+        Storage::disk('public')->delete($relativePath);
     }
 
     public function storeProject(Request $request): RedirectResponse

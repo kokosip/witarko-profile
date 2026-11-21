@@ -33,9 +33,18 @@ export default function AdminLogin() {
 
                 <main className="mx-auto my-8 w-full max-w-md">
                     <div className="rounded-lg border border-paper-border bg-paper-card p-6 sm:p-8 dark:border-slate-border dark:bg-slate-card">
-                        <h1 className="font-serif text-2xl font-semibold text-ink dark:text-slate-ink">
-                            Masuk Admin
-                        </h1>
+                        <div className="flex items-center gap-3">
+                            <img
+                                src="/images/logo.jpg"
+                                alt=""
+                                width={32}
+                                height={32}
+                                className="h-8 w-8 rounded-full object-cover"
+                            />
+                            <h1 className="font-serif text-2xl font-semibold text-ink dark:text-slate-ink">
+                                Masuk Admin
+                            </h1>
+                        </div>
                         <p className="mt-1.5 text-sm text-ink-muted dark:text-slate-muted">
                             Masuk untuk mengelola konten profil dan daftar proyek.
                         </p>

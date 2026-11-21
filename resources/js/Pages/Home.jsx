@@ -36,9 +36,16 @@ export default function Home({ profile, projects = [] }) {
                     <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
                         <a
                             href="#top"
-                            className="inline-flex min-h-[44px] items-center font-serif text-xl font-semibold tracking-tight text-ink dark:text-slate-ink"
+                            className="inline-flex min-h-[44px] items-center gap-2.5 font-serif text-xl font-semibold tracking-tight text-ink dark:text-slate-ink"
                         >
-                            {fullName}
+                            <img
+                                src="/images/logo.jpg"
+                                alt=""
+                                width={28}
+                                height={28}
+                                className="h-7 w-7 rounded-full object-cover"
+                            />
+                            <span>{fullName}</span>
                         </a>
 
                         <nav aria-label="Navigasi utama" className="hidden items-center gap-1 md:flex">

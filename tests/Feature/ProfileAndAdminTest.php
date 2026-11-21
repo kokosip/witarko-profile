@@ -6,6 +6,8 @@ use App\Models\Profile;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -40,19 +42,22 @@ class ProfileAndAdminTest extends TestCase
 
     public function test_admin_can_login_and_logout(): void
     {
-        $this->seed();
+        $user = User::factory()->create([
+            'email' => 'admin@witarko.local',
+            'password' => 'password',
+        ]);
 
         $this->get('/admin/login')
             ->assertStatus(200)
             ->assertInertia(fn (Assert $page) => $page->component('AdminLogin'));
 
         $this->post('/admin/login', [
-            'email' => 'admin@witarko.local',
+            'email' => $user->email,
             'password' => 'wrong-password',
         ])->assertSessionHasErrors('email');
 
         $this->post('/admin/login', [
-            'email' => 'admin@witarko.local',
+            'email' => $user->email,
             'password' => 'password',
         ])->assertRedirect('/admin');
 
@@ -180,5 +185,38 @@ class ProfileAndAdminTest extends TestCase
         $this->assertNull($project->subdomain_url);
 
         $this->get('/')->assertStatus(200)->assertSee('Internal ERP');
+    }
+
+    public function test_admin_can_upload_and_remove_profile_photo(): void
+    {
+        Storage::fake('public');
+        $this->seed();
+        $user = User::query()->firstOrFail();
+
+        $file = UploadedFile::fake()->image('avatar.jpg', 200, 200);
+
+        $response = $this->actingAs($user)->put('/admin/profile', [
+            'full_name' => 'Witarko',
+            'avatar_file' => $file,
+        ]);
+
+        $response->assertRedirect();
+
+        $profile = Profile::query()->first();
+        $this->assertNotNull($profile->avatar_url);
+        $this->assertStringStartsWith('/storage/avatars/', $profile->avatar_url);
+
+        $storedPath = str_replace('/storage/', '', $profile->avatar_url);
+        Storage::disk('public')->assertExists($storedPath);
+
+        $removeResponse = $this->actingAs($user)->put('/admin/profile', [
+            'full_name' => 'Witarko',
+            'remove_avatar' => true,
+        ]);
+
+        $removeResponse->assertRedirect();
+        $profile->refresh();
+        $this->assertNull($profile->avatar_url);
+        Storage::disk('public')->assertMissing($storedPath);
     }
 }
