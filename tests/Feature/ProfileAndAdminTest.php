@@ -89,6 +89,7 @@ class ProfileAndAdminTest extends TestCase
 
         $response = $this->actingAs($user)->put('/admin/profile', [
             'full_name' => 'Witarko Updated',
+            'nickname' => 'Koko',
             'headline' => 'Senior Fullstack Engineer',
             'location' => 'Yogyakarta, Indonesia',
             'email' => 'witarko@example.com',
@@ -113,6 +114,7 @@ class ProfileAndAdminTest extends TestCase
 
         $profile = Profile::query()->first();
         $this->assertSame('Witarko Updated', $profile->full_name);
+        $this->assertSame('Koko', $profile->nickname);
         $this->assertSame('Senior Fullstack Engineer', $profile->headline);
         $this->assertSame(['Laravel', 'PostgreSQL', 'React'], $profile->skills);
         $this->assertCount(1, $profile->experiences);

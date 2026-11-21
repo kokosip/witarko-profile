@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             ['id' => 1],
             [
                 'full_name' => 'Witarko',
+                'nickname' => 'Koko',
                 'headline' => 'Software Engineer [REAL DATA - lengkapi peran utama di /admin]',
                 'location' => 'Yogyakarta, Indonesia',
                 'email' => null,

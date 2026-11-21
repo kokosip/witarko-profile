@@ -44,6 +44,7 @@ export default function Admin({ profile, projects = [] }) {
 
     const profileForm = useForm({
         full_name: profile?.full_name || '',
+        nickname: profile?.nickname || '',
         headline: profile?.headline || '',
         location: profile?.location || '',
         email: profile?.email || '',
@@ -362,6 +363,25 @@ export default function Admin({ profile, projects = [] }) {
                                 </div>
 
                                 <div>
+                                    <label htmlFor="nickname" className={labelClass}>
+                                        Nama Panggilan (opsional)
+                                    </label>
+                                    <input
+                                        id="nickname"
+                                        type="text"
+                                        value={profileForm.data.nickname}
+                                        onChange={(e) => profileForm.setData('nickname', e.target.value)}
+                                        placeholder="Contoh: Koko"
+                                        className={inputClass}
+                                    />
+                                    {profileForm.errors.nickname && (
+                                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                                            {profileForm.errors.nickname}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="sm:col-span-2">
                                     <label htmlFor="location" className={labelClass}>
                                         Lokasi
                                     </label>

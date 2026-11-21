@@ -6,6 +6,7 @@ export default function Home({ profile, projects = [] }) {
     const [menuOpen, setMenuOpen] = useState(false);
 
     const fullName = profile?.full_name || 'Witarko';
+    const nickname = profile?.nickname || '';
     const headline = profile?.headline || '[REAL DATA] Software Engineer';
     const location = profile?.location || 'Yogyakarta, Indonesia';
     const skills = Array.isArray(profile?.skills) ? profile.skills : [];
@@ -113,6 +114,11 @@ export default function Home({ profile, projects = [] }) {
                                 </p>
                                 <h1 className="mt-2 font-serif text-4xl font-semibold tracking-tight text-ink sm:text-5xl dark:text-slate-ink">
                                     {fullName}
+                                    {nickname && (
+                                        <span className="ml-2.5 font-normal text-ink-muted dark:text-slate-muted">
+                                            ({nickname})
+                                        </span>
+                                    )}
                                 </h1>
                                 <p className="mt-3 text-lg leading-relaxed text-ink-muted sm:text-xl dark:text-slate-muted">
                                     {headline}

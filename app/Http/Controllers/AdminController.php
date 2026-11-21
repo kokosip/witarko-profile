@@ -34,6 +34,7 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
+            'nickname' => ['nullable', 'string', 'max:80'],
             'headline' => ['nullable', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:150'],
             'email' => ['nullable', 'email', 'max:150'],
