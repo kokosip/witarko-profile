@@ -45,7 +45,11 @@ Website CV dan portofolio single-page untuk **Witarko**, dibangun menggunakan **
    npm run build
    php artisan serve
    ```
-   Akses halaman CV di `http://127.0.0.1:8000` dan halaman admin di `http://127.0.0.1:8000/admin`.
+   - Halaman CV publik: `http://127.0.0.1:8000`
+   - Halaman Admin (akses langsung via prefix `/admin`): `http://127.0.0.1:8000/admin`
+   - Akun admin default hasil seeder:
+     - Email: `admin@witarko.local` (dapat diubah via `ADMIN_EMAIL` di `.env`)
+     - Password: `password` (dapat diubah via `ADMIN_PASSWORD` di `.env`)
 
 ## Pengujian
 

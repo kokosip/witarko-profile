@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Profile;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -12,7 +13,7 @@ class ProfileAndAdminTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_home_page_renders_profile_and_non_archived_projects(): void
+    public function test_home_page_renders_profile_and_non_archived_projects_without_admin_link(): void
     {
         $this->seed();
 
@@ -30,11 +31,43 @@ class ProfileAndAdminTest extends TestCase
         $response->assertDontSee('Archived Secret App');
     }
 
-    public function test_admin_page_renders(): void
+    public function test_unauthenticated_user_is_redirected_to_admin_login(): void
+    {
+        $this->get('/admin')->assertRedirect('/admin/login');
+        $this->put('/admin/profile', [])->assertRedirect('/admin/login');
+        $this->post('/admin/projects', [])->assertRedirect('/admin/login');
+    }
+
+    public function test_admin_can_login_and_logout(): void
     {
         $this->seed();
 
-        $response = $this->get('/admin');
+        $this->get('/admin/login')
+            ->assertStatus(200)
+            ->assertInertia(fn (Assert $page) => $page->component('AdminLogin'));
+
+        $this->post('/admin/login', [
+            'email' => 'admin@witarko.local',
+            'password' => 'wrong-password',
+        ])->assertSessionHasErrors('email');
+
+        $this->post('/admin/login', [
+            'email' => 'admin@witarko.local',
+            'password' => 'password',
+        ])->assertRedirect('/admin');
+
+        $this->assertAuthenticated();
+
+        $this->post('/admin/logout')->assertRedirect('/');
+        $this->assertGuest();
+    }
+
+    public function test_authenticated_admin_page_renders(): void
+    {
+        $this->seed();
+        $user = User::query()->firstOrFail();
+
+        $response = $this->actingAs($user)->get('/admin');
 
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page
@@ -47,8 +80,9 @@ class ProfileAndAdminTest extends TestCase
     public function test_admin_can_update_profile(): void
     {
         $this->seed();
+        $user = User::query()->firstOrFail();
 
-        $response = $this->put('/admin/profile', [
+        $response = $this->actingAs($user)->put('/admin/profile', [
             'full_name' => 'Witarko Updated',
             'headline' => 'Senior Fullstack Engineer',
             'location' => 'Yogyakarta, Indonesia',
@@ -81,7 +115,10 @@ class ProfileAndAdminTest extends TestCase
 
     public function test_admin_can_create_update_and_delete_project(): void
     {
-        $createResponse = $this->post('/admin/projects', [
+        $this->seed();
+        $user = User::query()->firstOrFail();
+
+        $createResponse = $this->actingAs($user)->post('/admin/projects', [
             'title' => 'Sistem Inventori',
             'description' => 'Aplikasi inventori berbasis web.',
             'subdomain_url' => 'https://inventori.witarko.dev',
@@ -98,7 +135,7 @@ class ProfileAndAdminTest extends TestCase
         $this->assertNotNull($project);
         $this->assertSame('https://inventori.witarko.dev', $project->subdomain_url);
 
-        $updateResponse = $this->put("/admin/projects/{$project->id}", [
+        $updateResponse = $this->actingAs($user)->put("/admin/projects/{$project->id}", [
             'title' => 'Sistem Inventori v2',
             'description' => 'Versi terbaru.',
             'subdomain_url' => 'https://inv2.witarko.dev',
@@ -114,8 +151,34 @@ class ProfileAndAdminTest extends TestCase
         $this->assertSame('Sistem Inventori v2', $project->title);
         $this->assertSame('coming_soon', $project->status);
 
-        $deleteResponse = $this->delete("/admin/projects/{$project->id}");
+        $deleteResponse = $this->actingAs($user)->delete("/admin/projects/{$project->id}");
         $deleteResponse->assertRedirect();
         $this->assertDatabaseMissing('projects', ['id' => $project->id]);
+    }
+
+    public function test_admin_can_create_closed_source_project_without_github_or_subdomain(): void
+    {
+        $this->seed();
+        $user = User::query()->firstOrFail();
+
+        $response = $this->actingAs($user)->post('/admin/projects', [
+            'title' => 'Internal ERP',
+            'description' => 'Aplikasi internal perusahaan.',
+            'subdomain_url' => null,
+            'github_url' => null,
+            'tech_stack' => ['Laravel', 'PostgreSQL'],
+            'status' => 'published',
+            'is_featured' => false,
+            'sort_order' => 1,
+        ]);
+
+        $response->assertRedirect();
+
+        $project = Project::query()->where('slug', 'internal-erp')->first();
+        $this->assertNotNull($project);
+        $this->assertNull($project->github_url);
+        $this->assertNull($project->subdomain_url);
+
+        $this->get('/')->assertStatus(200)->assertSee('Internal ERP');
     }
 }

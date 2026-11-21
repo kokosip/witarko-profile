@@ -230,6 +230,13 @@ export default function Admin({ profile, projects = [] }) {
                                 Lihat CV Publik
                             </Link>
                             <ThemeToggle />
+                            <button
+                                type="button"
+                                onClick={() => router.post('/admin/logout')}
+                                className="inline-flex min-h-[44px] items-center rounded-md border border-paper-border px-3.5 py-2 text-sm font-medium text-ink-muted transition-colors hover:border-red-600/40 hover:text-red-600 dark:border-slate-border dark:text-slate-muted dark:hover:border-red-400/40 dark:hover:text-red-400"
+                            >
+                                Keluar
+                            </button>
                         </div>
                     </div>
                 </header>
@@ -816,7 +823,7 @@ export default function Admin({ profile, projects = [] }) {
 
                             <div>
                                 <label htmlFor="proj_subdomain" className={labelClass}>
-                                    URL Subdomain Deploy
+                                    URL Subdomain Deploy (opsional)
                                 </label>
                                 <input
                                     id="proj_subdomain"
@@ -835,7 +842,7 @@ export default function Admin({ profile, projects = [] }) {
 
                             <div>
                                 <label htmlFor="proj_github" className={labelClass}>
-                                    URL Repositori GitHub
+                                    URL Repositori GitHub (opsional, kosongkan jika closed source)
                                 </label>
                                 <input
                                     id="proj_github"

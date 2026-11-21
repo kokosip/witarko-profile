@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import ThemeToggle from '../Components/ThemeToggle';
 
@@ -54,12 +54,6 @@ export default function Home({ profile, projects = [] }) {
                         </nav>
 
                         <div className="flex items-center gap-2">
-                            <Link
-                                href="/admin"
-                                className="hidden min-h-[44px] items-center rounded-md border border-paper-border px-3 py-2 text-sm font-medium text-ink transition-colors hover:border-ink/30 sm:inline-flex dark:border-slate-border dark:text-slate-ink dark:hover:border-slate-ink/30"
-                            >
-                                Admin
-                            </Link>
                             <ThemeToggle />
                             <button
                                 type="button"
@@ -97,13 +91,6 @@ export default function Home({ profile, projects = [] }) {
                                         {item.label}
                                     </a>
                                 ))}
-                                <Link
-                                    href="/admin"
-                                    onClick={() => setMenuOpen(false)}
-                                    className="inline-flex min-h-[44px] items-center rounded-md px-3 py-2 text-sm font-medium text-accent dark:text-slate-accent"
-                                >
-                                    Kelola Profil (Admin)
-                                </Link>
                             </div>
                         </nav>
                     )}
@@ -204,13 +191,7 @@ export default function Home({ profile, projects = [] }) {
                                 {profile?.summary ? (
                                     <p className="whitespace-pre-line">{profile.summary}</p>
                                 ) : (
-                                    <p>
-                                        Belum ada ringkasan profil. Tambahkan melalui{' '}
-                                        <Link href="/admin" className="underline text-accent dark:text-slate-accent">
-                                            halaman Admin
-                                        </Link>
-                                        .
-                                    </p>
+                                    <p>Belum ada ringkasan profil.</p>
                                 )}
                             </div>
                         </div>
@@ -225,11 +206,7 @@ export default function Home({ profile, projects = [] }) {
 
                             {experiences.length === 0 ? (
                                 <p className="text-sm text-ink-muted dark:text-slate-muted">
-                                    Belum ada riwayat pengalaman kerja.{' '}
-                                    <Link href="/admin" className="underline text-accent dark:text-slate-accent">
-                                        Tambahkan di Admin
-                                    </Link>
-                                    .
+                                    Belum ada riwayat pengalaman kerja.
                                 </p>
                             ) : (
                                 <div className="space-y-8">
@@ -266,30 +243,18 @@ export default function Home({ profile, projects = [] }) {
 
                     {/* Proyek & Subdomain */}
                     <section id="proyek" className="scroll-mt-20 border-b border-paper-border py-10 dark:border-slate-border">
-                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-                            <div>
-                                <h2 className="font-serif text-2xl font-semibold text-ink dark:text-slate-ink">
-                                    Proyek &amp; Subdomain
-                                </h2>
-                                <p className="mt-1 text-sm text-ink-muted dark:text-slate-muted">
-                                    Daftar aplikasi dan repositori yang dikerjakan beserta tautan deploy subdomain.
-                                </p>
-                            </div>
-                            <Link
-                                href="/admin"
-                                className="inline-flex min-h-[44px] items-center text-sm font-medium text-accent underline-offset-4 hover:underline print:hidden dark:text-slate-accent"
-                            >
-                                Kelola proyek di Admin
-                            </Link>
+                        <div>
+                            <h2 className="font-serif text-2xl font-semibold text-ink dark:text-slate-ink">
+                                Proyek &amp; Subdomain
+                            </h2>
+                            <p className="mt-1 text-sm text-ink-muted dark:text-slate-muted">
+                                Daftar aplikasi dan repositori yang dikerjakan beserta tautan deploy subdomain.
+                            </p>
                         </div>
 
                         {projects.length === 0 ? (
                             <div className="mt-6 rounded-lg border border-paper-border bg-paper-card p-6 text-sm text-ink-muted dark:border-slate-border dark:bg-slate-card dark:text-slate-muted">
-                                Belum ada proyek yang ditambahkan. Buka{' '}
-                                <Link href="/admin" className="font-medium underline text-accent dark:text-slate-accent">
-                                    halaman Admin
-                                </Link>{' '}
-                                untuk menambahkan proyek pertama.
+                                Belum ada proyek yang ditambahkan.
                             </div>
                         ) : (
                             <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -336,36 +301,34 @@ export default function Home({ profile, projects = [] }) {
                                                 )}
                                             </div>
 
-                                            <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-paper-border pt-4 dark:border-slate-border">
-                                                {project.subdomain_url ? (
-                                                    <a
-                                                        href={project.subdomain_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-accent px-3 py-2 font-mono text-xs font-medium text-white transition-colors hover:bg-accent-hover dark:bg-slate-accent dark:text-slate-bg dark:hover:bg-slate-accent-hover"
-                                                    >
-                                                        <span>{project.subdomain_url.replace(/^https?:\/\//, '')}</span>
-                                                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                                            <path d="M7 17L17 7M7 7h10v10" />
-                                                        </svg>
-                                                    </a>
-                                                ) : (
-                                                    <span className="font-mono text-xs text-ink-muted dark:text-slate-muted">
-                                                        Subdomain belum ditautkan
-                                                    </span>
-                                                )}
+                                            {(project.subdomain_url || project.github_url) && (
+                                                <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-paper-border pt-4 dark:border-slate-border">
+                                                    {project.subdomain_url && (
+                                                        <a
+                                                            href={project.subdomain_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-accent px-3 py-2 font-mono text-xs font-medium text-white transition-colors hover:bg-accent-hover dark:bg-slate-accent dark:text-slate-bg dark:hover:bg-slate-accent-hover"
+                                                        >
+                                                            <span>{project.subdomain_url.replace(/^https?:\/\//, '')}</span>
+                                                            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                                                                <path d="M7 17L17 7M7 7h10v10" />
+                                                            </svg>
+                                                        </a>
+                                                    )}
 
-                                                {project.github_url && (
-                                                    <a
-                                                        href={project.github_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-paper-border px-3 py-2 text-xs font-medium text-ink transition-colors hover:border-ink/40 dark:border-slate-border dark:text-slate-ink dark:hover:border-slate-ink/40"
-                                                    >
-                                                        <span>Source Code</span>
-                                                    </a>
-                                                )}
-                                            </div>
+                                                    {project.github_url && (
+                                                        <a
+                                                            href={project.github_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-paper-border px-3 py-2 text-xs font-medium text-ink transition-colors hover:border-ink/40 dark:border-slate-border dark:text-slate-ink dark:hover:border-slate-ink/40"
+                                                        >
+                                                            <span>Source Code</span>
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            )}
                                         </article>
                                     );
                                 })}
@@ -461,12 +424,6 @@ export default function Home({ profile, projects = [] }) {
                                     LinkedIn
                                 </a>
                             )}
-                            <Link
-                                href="/admin"
-                                className="inline-flex min-h-[44px] items-center text-accent hover:underline dark:text-slate-accent"
-                            >
-                                Admin Panel
-                            </Link>
                         </div>
                     </div>
                 </footer>
