@@ -12,11 +12,14 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL') ?: 'admin@witarko.local';
+        $adminPassword = config('app.admin_password') ?: env('ADMIN_PASSWORD') ?: 'password';
+
         User::query()->updateOrCreate(
-            ['email' => config('app.admin_email')],
+            ['email' => $adminEmail],
             [
                 'name' => 'Witarko',
-                'password' => Hash::make(config('app.admin_password')),
+                'password' => Hash::make($adminPassword),
             ]
         );
         Profile::query()->firstOrCreate(
